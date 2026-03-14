@@ -1,15 +1,12 @@
 package org.test.todolistapps.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -19,15 +16,23 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "category")
-@EntityListeners(AuditingEntityListener.class)
-
 public class Category {
 
     @Id
-    private int id;
-    private String category;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @CreatedDate
+    @Column(nullable = false)
+    private String name;
+
+    @Column
+    private String description;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

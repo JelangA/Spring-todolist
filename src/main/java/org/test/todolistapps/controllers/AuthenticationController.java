@@ -1,5 +1,6 @@
 package org.test.todolistapps.controllers;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +17,6 @@ import org.test.todolistapps.utils.JwtUtil;
 @RestController
 public class AuthenticationController {
     private final JwtUtil jwtUtil;
-
     private final AuthenticationService authenticationService;
 
     public AuthenticationController(JwtUtil jwtUtil, AuthenticationService authenticationService) {
