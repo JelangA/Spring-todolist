@@ -1,16 +1,19 @@
 package org.test.todolistapps.utils;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtUtil {
 
@@ -33,27 +36,60 @@ public class JwtUtil {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
     public long getExpirationTime() {
         return jwtExpiration;
     }
 
     private Claims extractAllClaims(String token) {
-        var parser = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build();
-        return parser.parseClaimsJws(token).getBody();
+        try {
+            var parser = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build();
+            return parser.parseClaimsJws(token).getBody();
+        } catch (JwtException e) {
+            log.error("Error parsing JWT token: {}", e.getMessage());
+            throw e;
+        }
     }
 
     public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
+        try {
+            return extractAllClaims(token).getSubject();
+        } catch (Exception e) {
+            log.error("Error extracting username from token: {}", e.getMessage());
+            return null;
+        }
     }
 
     private boolean isTokenExpired(String token) {
-        return extractAllClaims(token).getExpiration().before(new Date());
+        try {
+            return extractAllClaims(token).getExpiration().before(new Date());
+        } catch (Exception e) {
+            log.error("Error checking token expiration: {}", e.getMessage());
+            return true; // Consider expired if we can't verify
+        }
     }
 
     public boolean isTokenValid(String token, String usernameFromUserDetails) {
-        final String usernameFromToken = extractUsername(token);
-        return usernameFromToken.equals(usernameFromUserDetails) && !isTokenExpired(token);
+        try {
+            final String usernameFromToken = extractUsername(token);
+            if (usernameFromToken == null) {
+                log.warn("Could not extract username from token");
+                return false;
+            }
+
+            boolean isValid = usernameFromToken.equals(usernameFromUserDetails) && !isTokenExpired(token);
+
+            if (!isValid) {
+                log.warn("Token validation failed. Username match: {}, Token expired: {}",
+                    usernameFromToken.equals(usernameFromUserDetails), isTokenExpired(token));
+            }
+
+            return isValid;
+        } catch (Exception e) {
+            log.error("Error validating token: {}", e.getMessage());
+            return false;
+        }
     }
 }
