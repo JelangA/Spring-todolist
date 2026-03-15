@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.test.todolistapps.dto.CategoryRequest;
+import org.test.todolistapps.dto.CategoryResponse;
 import org.test.todolistapps.entities.Category;
+import org.test.todolistapps.entities.Task;
 import org.test.todolistapps.services.CategoryService;
 
 import java.util.List;
@@ -35,12 +37,22 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
         Category category = categoryService.getCategoryById(id);
-        if (category != null) {
-            return ResponseEntity.ok(category);
+        if (category == null) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+
+        List<Task> tasks = categoryService.getTasksByCategoryId(id);
+
+        CategoryResponse response = CategoryResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .description(category.getDescription())
+                .tasks(tasks)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")

@@ -2,8 +2,10 @@ package org.test.todolistapps.services;
 
 import org.springframework.stereotype.Service;
 import org.test.todolistapps.entities.Category;
+import org.test.todolistapps.entities.Task;
 import org.test.todolistapps.repository.CategoryRepository;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -44,5 +46,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategory(Long id) {
         categoryRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Task> getTasksByCategoryId(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId).orElse(null);
+        if (category == null) {
+            return Collections.emptyList();
+        }
+        return category.getTasks();
     }
 }
