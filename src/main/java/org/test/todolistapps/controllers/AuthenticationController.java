@@ -1,6 +1,5 @@
 package org.test.todolistapps.controllers;
 
-import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +34,7 @@ public class AuthenticationController {
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequest loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
-        String jwtToken = jwtUtil.generateToken(String.valueOf(authenticatedUser));
+        String jwtToken = jwtUtil.generateToken(authenticatedUser.getUsername());
 
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(jwtToken);
