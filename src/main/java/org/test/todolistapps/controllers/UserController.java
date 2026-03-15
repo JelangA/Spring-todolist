@@ -1,5 +1,6 @@
 package org.test.todolistapps.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,6 +12,7 @@ import org.test.todolistapps.services.UserService;
 
 import java.util.List;
 
+@Slf4j
 @RequestMapping("/users")
 @RestController
 public class UserController {
@@ -22,8 +24,9 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<User> authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info(String.valueOf(authentication));
         User currentUser = (User) authentication.getPrincipal();
 
         return ResponseEntity.ok(currentUser);

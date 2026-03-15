@@ -67,7 +67,7 @@ public class JwtUtil {
             return extractAllClaims(token).getExpiration().before(new Date());
         } catch (Exception e) {
             log.error("Error checking token expiration: {}", e.getMessage());
-            return true; // Consider expired if we can't verify
+            return true;
         }
     }
 
