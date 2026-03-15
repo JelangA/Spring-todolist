@@ -15,7 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "Bearer Authentication")
 public class CategoryController {
 
     private final CategoryService categoryService;

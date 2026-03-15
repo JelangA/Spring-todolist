@@ -60,7 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            if (userEmail != null && authentication == null ||authentication instanceof AnonymousAuthenticationToken  ) {
+            if (userEmail != null && (authentication == null || authentication instanceof AnonymousAuthenticationToken)) {
                 try {
                     UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
