@@ -1,5 +1,6 @@
 package org.test.todolistapps.services;
 
+import org.test.todolistapps.dto.TaskDtoStatus;
 import org.test.todolistapps.entities.Task;
 
 import java.util.List;
@@ -13,4 +14,5 @@ public interface TaskServices {
     List<Task> getTasksByCreatedBy(Long userId);
     List<Task> getCompletedTasks();
     List<Task> getIncompleteTasks();
+    List<TaskDtoStatus> getByStatus(String status);
 }

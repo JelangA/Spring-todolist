@@ -23,7 +23,7 @@ public class Task {
     private Long id;
 
     @Column(name = "task_name", nullable = false)
-    private String taskName;
+    private String taskName;//show
 
     @Column(nullable = false)
     private String status;
@@ -42,5 +42,5 @@ public class Task {
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;//show
 }

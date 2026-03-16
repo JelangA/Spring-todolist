@@ -1,6 +1,9 @@
 package org.test.todolistapps.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import org.test.todolistapps.dto.CategoryResponse;
 import org.test.todolistapps.dto.TaskResponse;
 import org.test.todolistapps.dto.TaskResponseGetCategory;
@@ -16,11 +19,13 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ObjectMapper objectMapper;
     private final TaskRepository taskRepository;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, TaskRepository taskRepository) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, TaskRepository taskRepository, ObjectMapper objectMapper) {
         this.categoryRepository = categoryRepository;
         this.taskRepository = taskRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -48,6 +53,21 @@ public class CategoryServiceImpl implements CategoryService {
                 .description(category.getDescription())
                 .tasks(taskResponses)
                 .build();
+
+//        List<Task> tasks = taskRepository.findByCategoryId(id);
+//
+//        TaskResponse taskresponse = objectMapper.convertValue(tasks, TaskResponse.class);
+//
+//        for (Task task : tasks){
+//            TaskResponse taskResponse = mapTaskToTaskResponse(task);
+//        }
+//
+//        return CategoryResponse.builder()
+//                .id(category.getId())
+//                .name(category.getName())
+//                .description(category.getDescription())
+//                .tasks(taskresponse)
+//                .build();
     }
 
     @Override

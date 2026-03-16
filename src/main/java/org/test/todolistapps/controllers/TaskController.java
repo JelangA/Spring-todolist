@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.test.todolistapps.dto.CreateTaskRequest;
+import org.test.todolistapps.dto.TaskDtoStatus;
 import org.test.todolistapps.dto.TaskResponseGetCategory;
 import org.test.todolistapps.dto.UpdateTaskRequest;
 import org.test.todolistapps.entities.Category;
@@ -124,6 +125,12 @@ public class TaskController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<TaskDtoStatus>> getTasksByStatus(@PathVariable String status) {
+        List<TaskDtoStatus> tasksResponse = taskServices.getByStatus(status);
+        return ResponseEntity.ok(tasksResponse);
     }
 
     private TaskResponseGetCategory convertToTaskResponse(Task task) {

@@ -1,20 +1,28 @@
 package org.test.todolistapps.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.test.todolistapps.dto.TaskDtoStatus;
+import org.test.todolistapps.dto.TaskResponse;
 import org.test.todolistapps.entities.Task;
 import org.test.todolistapps.repository.TaskRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Locale.filter;
 
 @Service
 @Transactional
 public class TaskServicesImpl implements TaskServices {
 
     private final TaskRepository taskRepository;
+    private final ObjectMapper objectMapper;
 
-    public TaskServicesImpl(TaskRepository taskRepository) {
+    public TaskServicesImpl(TaskRepository taskRepository, ObjectMapper objectMapper) {
         this.taskRepository = taskRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -63,4 +71,14 @@ public class TaskServicesImpl implements TaskServices {
     public List<Task> getIncompleteTasks() {
         return taskRepository.findIncompleteTasks();
     }
+    @Override
+    public List<TaskDtoStatus> getByStatus(String status) {
+
+        List<Task> tasks = taskRepository.findAll();
+
+        return tasks.stream()
+                .map(task -> objectMapper.convertValue(task, TaskDtoStatus.class))
+                .toList();
+    }
+
 }
