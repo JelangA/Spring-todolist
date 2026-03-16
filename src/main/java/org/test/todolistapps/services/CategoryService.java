@@ -1,14 +1,14 @@
 package org.test.todolistapps.services;
 
+import org.test.todolistapps.dto.CategoryResponse;
 import org.test.todolistapps.entities.Category;
-import org.test.todolistapps.entities.Task;
 
 import java.util.List;
 
 public interface CategoryService {
     List<Category> getAllCategories();
 
-    Category getCategoryById(Long id);
+    CategoryResponse getCategoryById(Long id);
 
     Category createCategory(Category category);
 
@@ -16,5 +16,5 @@ public interface CategoryService {
 
     void deleteCategory(Long id);
 
-    List<Task> getTasksByCategoryId(Long categoryId);
+    Category getCategoryEntityById(Long id);
 }

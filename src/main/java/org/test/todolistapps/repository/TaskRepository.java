@@ -17,4 +17,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query("SELECT t FROM Task t WHERE t.status = 'incomplete'")
     List<Task> findIncompleteTasks();
+
+    @Query("SELECT t FROM Task t WHERE t.category.id = :categoryId")
+    List<Task> findByCategoryId(@Param("categoryId") Long categoryId);
 }

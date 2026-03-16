@@ -1,13 +1,11 @@
 package org.test.todolistapps.controllers;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.test.todolistapps.dto.CategoryRequest;
 import org.test.todolistapps.dto.CategoryResponse;
 import org.test.todolistapps.entities.Category;
-import org.test.todolistapps.entities.Task;
 import org.test.todolistapps.services.CategoryService;
 
 import java.util.List;
@@ -37,21 +35,11 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
-        Category category = categoryService.getCategoryById(id);
-        if (category == null) {
+        CategoryResponse categoryResponse = categoryService.getCategoryById(id);
+        if (categoryResponse == null) {
             return ResponseEntity.notFound().build();
         }
-
-        List<Task> tasks = categoryService.getTasksByCategoryId(id);
-
-        CategoryResponse response = CategoryResponse.builder()
-                .id(category.getId())
-                .name(category.getName())
-                .description(category.getDescription())
-                .tasks(tasks)
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(categoryResponse);
     }
 
     @PutMapping("/{id}")
@@ -69,11 +57,11 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-        Category category = categoryService.getCategoryById(id);
-        if (category != null) {
-            categoryService.deleteCategory(id);
-            return ResponseEntity.noContent().build();
+        CategoryResponse categoryResponse = categoryService.getCategoryById(id);
+        if (categoryResponse == null) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+        categoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
     }
 }

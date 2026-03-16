@@ -1,20 +1,26 @@
 package org.test.todolistapps.services;
 
 import org.springframework.stereotype.Service;
+import org.test.todolistapps.dto.CategoryResponse;
+import org.test.todolistapps.dto.TaskResponse;
+import org.test.todolistapps.dto.TaskResponseGetCategory;
 import org.test.todolistapps.entities.Category;
 import org.test.todolistapps.entities.Task;
 import org.test.todolistapps.repository.CategoryRepository;
+import org.test.todolistapps.repository.TaskRepository;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final TaskRepository taskRepository;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, TaskRepository taskRepository) {
         this.categoryRepository = categoryRepository;
+        this.taskRepository = taskRepository;
     }
 
     @Override
@@ -23,8 +29,25 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category getCategoryById(Long id) {
-        return categoryRepository.findById(id).orElse(null);
+    public CategoryResponse getCategoryById(Long id) {
+
+        Category category = categoryRepository.findById(id).orElse(null);
+        if (category == null) {
+            return null;
+        }
+
+        List<Task> tasks = taskRepository.findByCategoryId(id);
+
+        List<TaskResponse> taskResponses = tasks.stream()
+                .map(this::mapTaskToTaskResponse)
+                .collect(Collectors.toList());
+
+        return CategoryResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .description(category.getDescription())
+                .tasks(taskResponses)
+                .build();
     }
 
     @Override
@@ -49,11 +72,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<Task> getTasksByCategoryId(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId).orElse(null);
-        if (category == null) {
-            return Collections.emptyList();
-        }
-        return category.getTasks();
+    public Category getCategoryEntityById(Long id) {
+        return categoryRepository.findById(id).orElse(null);
+    }
+
+    private TaskResponse mapTaskToTaskResponse(Task task) {
+        return TaskResponse.builder()
+                .taskName(task.getTaskName())
+                .createdAt(task.getCreatedAt())
+                .build();
     }
 }

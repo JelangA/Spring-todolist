@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.test.todolistapps.dto.CreateTaskRequest;
-import org.test.todolistapps.dto.TaskResponse;
+import org.test.todolistapps.dto.TaskResponseGetCategory;
 import org.test.todolistapps.dto.UpdateTaskRequest;
 import org.test.todolistapps.entities.Category;
 import org.test.todolistapps.entities.Task;
@@ -26,7 +26,7 @@ public class TaskController {
     private final UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<TaskResponse> createTask(@RequestBody CreateTaskRequest request, Authentication authentication) {
+    public ResponseEntity<TaskResponseGetCategory> createTask(@RequestBody CreateTaskRequest request, Authentication authentication) {
         String username = authentication.getName();
         User user = userRepository.findByUsername(username).orElse(null);
 
@@ -34,7 +34,7 @@ public class TaskController {
             return ResponseEntity.badRequest().build();
         }
 
-        Category category = categoryService.getCategoryById(request.getCategoryId());
+        Category category = categoryService.getCategoryEntityById(request.getCategoryId());
         if (category == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -47,7 +47,7 @@ public class TaskController {
                 .build();
 
         Task createdTask = taskServices.createTask(task);
-        TaskResponse response = convertToTaskResponse(createdTask);
+        TaskResponseGetCategory response = convertToTaskResponse(createdTask);
         return ResponseEntity.ok(response);
     }
 
@@ -100,7 +100,7 @@ public class TaskController {
 
         Category category = null;
         if (request.getCategoryId() != null) {
-            category = categoryService.getCategoryById(request.getCategoryId());
+            category = categoryService.getCategoryEntityById(request.getCategoryId());
         }
 
         Task updatedTask = Task.builder()
@@ -126,16 +126,12 @@ public class TaskController {
         return ResponseEntity.notFound().build();
     }
 
-    private TaskResponse convertToTaskResponse(Task task) {
-        return TaskResponse.builder()
-                .id(task.getId())
+    private TaskResponseGetCategory convertToTaskResponse(Task task) {
+        return TaskResponseGetCategory.builder()
                 .taskName(task.getTaskName())
-                .status(task.getStatus())
-                .categoryId(task.getCategory() != null ? task.getCategory().getId() : null)
-                .categoryName(task.getCategory() != null ? task.getCategory().getName() : null)
-                .createdBy(task.getCreatedBy())
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())
                 .build();
     }
+
 }
