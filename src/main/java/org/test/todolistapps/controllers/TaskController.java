@@ -8,12 +8,9 @@ import org.test.todolistapps.dto.CreateTaskRequest;
 import org.test.todolistapps.dto.TaskDtoStatus;
 import org.test.todolistapps.dto.TaskResponseGetCategory;
 import org.test.todolistapps.dto.UpdateTaskRequest;
-import org.test.todolistapps.entities.Category;
 import org.test.todolistapps.entities.Task;
-import org.test.todolistapps.entities.User;
-import org.test.todolistapps.repository.UserRepository;
-import org.test.todolistapps.services.CategoryService;
 import org.test.todolistapps.services.TaskServices;
+import org.test.todolistapps.utils.ApiResponse;
 
 import java.util.List;
 
@@ -23,122 +20,71 @@ import java.util.List;
 public class TaskController {
 
     private final TaskServices taskServices;
-    private final CategoryService categoryService;
-    private final UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<TaskResponseGetCategory> createTask(@RequestBody CreateTaskRequest request, Authentication authentication) {
+    public ResponseEntity<ApiResponse<TaskResponseGetCategory>> createTask(@RequestBody CreateTaskRequest request, Authentication authentication) {
         String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElse(null);
-
-        if (user == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Category category = categoryService.getCategoryEntityById(request.getCategoryId());
-        if (category == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Task task = Task.builder()
-                .taskName(request.getTaskName())
-                .status("incomplete")
-                .category(category)
-                .createdBy(user.getId())
-                .build();
-
-        Task createdTask = taskServices.createTask(task);
-        TaskResponseGetCategory response = convertToTaskResponse(createdTask);
-        return ResponseEntity.ok(response);
+        TaskResponseGetCategory response = taskServices.createTask(request, username);
+        return ResponseEntity.ok(ApiResponse.success("Task created successfully", response, 201));
     }
 
     @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks() {
+    public ResponseEntity<ApiResponse<List<Task>>> getAllTasks() {
         List<Task> tasks = taskServices.getAllTasks();
-        return ResponseEntity.ok(tasks);
+        return ResponseEntity.ok(ApiResponse.success("All tasks retrieved", tasks));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Task>> getTaskById(@PathVariable Long id) {
         Task task = taskServices.getTaskById(id);
         if (task != null) {
-            return ResponseEntity.ok(task);
+            return ResponseEntity.ok(ApiResponse.success("Task retrieved", task));
         }
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/my-tasks")
-    public ResponseEntity<List<Task>> getMyTasks(Authentication authentication) {
+    public ResponseEntity<ApiResponse<List<Task>>> getMyTasks(Authentication authentication) {
         String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElse(null);
-
-        if (user == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        List<Task> tasks = taskServices.getTasksByCreatedBy(user.getId());
-        return ResponseEntity.ok(tasks);
+        List<Task> tasks = taskServices.getMyTasks(username);
+        return ResponseEntity.ok(ApiResponse.success("Your tasks retrieved", tasks));
     }
 
     @GetMapping("/completed")
-    public ResponseEntity<List<Task>> getCompletedTasks() {
+    public ResponseEntity<ApiResponse<List<Task>>> getCompletedTasks() {
         List<Task> tasks = taskServices.getCompletedTasks();
-        return ResponseEntity.ok(tasks);
+        return ResponseEntity.ok(ApiResponse.success("Completed tasks retrieved", tasks));
     }
 
     @GetMapping("/incomplete")
-    public ResponseEntity<List<Task>> getIncompleteTasks() {
+    public ResponseEntity<ApiResponse<List<Task>>> getIncompleteTasks() {
         List<Task> tasks = taskServices.getIncompleteTasks();
-        return ResponseEntity.ok(tasks);
+        return ResponseEntity.ok(ApiResponse.success("Incomplete tasks retrieved", tasks));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody UpdateTaskRequest request) {
-        Task existingTask = taskServices.getTaskById(id);
-        if (existingTask == null) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<ApiResponse<Task>> updateTask(@PathVariable Long id, @RequestBody UpdateTaskRequest request) {
+        Task updatedTask = taskServices.updateTask(id, request);
+        if (updatedTask != null) {
+            return ResponseEntity.ok(ApiResponse.success("Task updated successfully", updatedTask));
         }
-
-        Category category = null;
-        if (request.getCategoryId() != null) {
-            category = categoryService.getCategoryEntityById(request.getCategoryId());
-        }
-
-        Task updatedTask = Task.builder()
-                .id(id)
-                .taskName(request.getTaskName())
-                .status(request.getStatus())
-                .category(category != null ? category : existingTask.getCategory())
-                .createdBy(existingTask.getCreatedBy())
-                .createdAt(existingTask.getCreatedAt())
-                .build();
-
-        Task result = taskServices.updateTask(id, updatedTask);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteTask(@PathVariable Long id) {
         Task task = taskServices.getTaskById(id);
         if (task != null) {
             taskServices.deleteTask(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(ApiResponse.success("Task deleted successfully", null));
         }
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<TaskDtoStatus>> getTasksByStatus(@PathVariable String status) {
+    public ResponseEntity<ApiResponse<List<TaskDtoStatus>>> getTasksByStatus(@PathVariable String status) {
         List<TaskDtoStatus> tasksResponse = taskServices.getByStatus(status);
-        return ResponseEntity.ok(tasksResponse);
-    }
-
-    private TaskResponseGetCategory convertToTaskResponse(Task task) {
-        return TaskResponseGetCategory.builder()
-                .taskName(task.getTaskName())
-                .createdAt(task.getCreatedAt())
-                .updatedAt(task.getUpdatedAt())
-                .build();
+        return ResponseEntity.ok(ApiResponse.success("Tasks by status retrieved", tasksResponse));
     }
 
 }

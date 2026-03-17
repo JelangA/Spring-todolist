@@ -1,5 +1,6 @@
 package org.test.todolistapps.services;
 
+import org.test.todolistapps.dto.CategoryRequest;
 import org.test.todolistapps.dto.CategoryResponse;
 import org.test.todolistapps.entities.Category;
 
@@ -10,9 +11,9 @@ public interface CategoryService {
 
     CategoryResponse getCategoryById(Long id);
 
-    Category createCategory(Category category);
+    Category createCategory(CategoryRequest request);
 
-    Category updateCategory(Long id, Category category);
+    Category updateCategory(Long id, CategoryRequest request);
 
     void deleteCategory(Long id);
 

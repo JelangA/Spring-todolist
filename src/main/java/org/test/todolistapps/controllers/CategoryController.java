@@ -7,6 +7,7 @@ import org.test.todolistapps.dto.CategoryRequest;
 import org.test.todolistapps.dto.CategoryResponse;
 import org.test.todolistapps.entities.Category;
 import org.test.todolistapps.services.CategoryService;
+import org.test.todolistapps.utils.ApiResponse;
 
 import java.util.List;
 
@@ -18,50 +19,42 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody CategoryRequest request) {
-        Category category = Category.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .build();
-        Category createdCategory = categoryService.createCategory(category);
-        return ResponseEntity.ok(createdCategory);
+    public ResponseEntity<ApiResponse<Category>> createCategory(@RequestBody CategoryRequest request) {
+        Category createdCategory = categoryService.createCategory(request);
+        return ResponseEntity.ok(ApiResponse.success("Category created successfully", createdCategory, 201));
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
+    public ResponseEntity<ApiResponse<List<Category>>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();
-        return ResponseEntity.ok(categories);
+        return ResponseEntity.ok(ApiResponse.success("All categories retrieved", categories));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable Long id) {
         CategoryResponse categoryResponse = categoryService.getCategoryById(id);
         if (categoryResponse == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(categoryResponse);
+        return ResponseEntity.ok(ApiResponse.success("Category retrieved", categoryResponse));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
-        Category category = Category.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .build();
-        Category updatedCategory = categoryService.updateCategory(id, category);
+    public ResponseEntity<ApiResponse<Category>> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest request) {
+        Category updatedCategory = categoryService.updateCategory(id, request);
         if (updatedCategory != null) {
-            return ResponseEntity.ok(updatedCategory);
+            return ResponseEntity.ok(ApiResponse.success("Category updated successfully", updatedCategory));
         }
         return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
         CategoryResponse categoryResponse = categoryService.getCategoryById(id);
         if (categoryResponse == null) {
             return ResponseEntity.notFound().build();
         }
         categoryService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Category deleted successfully", null));
     }
 }

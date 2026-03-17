@@ -10,36 +10,28 @@ import org.test.todolistapps.dto.LoginResponse;
 import org.test.todolistapps.dto.RegisterRequest;
 import org.test.todolistapps.entities.User;
 import org.test.todolistapps.services.AuthenticationService;
-import org.test.todolistapps.utils.JwtUtil;
+import org.test.todolistapps.utils.ApiResponse;
 
 @RequestMapping("/auth")
 @RestController
 public class AuthenticationController {
-    private final JwtUtil jwtUtil;
     private final AuthenticationService authenticationService;
 
-    public AuthenticationController(JwtUtil jwtUtil, AuthenticationService authenticationService) {
-        this.jwtUtil = jwtUtil;
+    public AuthenticationController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterRequest registerUserDto) {
+    public ResponseEntity<ApiResponse<User>> register(@RequestBody RegisterRequest registerUserDto) {
         User registeredUser = authenticationService.signup(registerUserDto);
 
-        return ResponseEntity.ok(registeredUser);
+        return ResponseEntity.ok(ApiResponse.success("User registered successfully", registeredUser, 201));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequest loginUserDto) {
-        User authenticatedUser = authenticationService.authenticate(loginUserDto);
+    public ResponseEntity<ApiResponse<LoginResponse>> authenticate(@RequestBody LoginRequest loginUserDto) {
+        LoginResponse loginResponse = authenticationService.authenticate(loginUserDto);
 
-        String jwtToken = jwtUtil.generateToken(authenticatedUser.getUsername());
-
-        LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setToken(jwtToken);
-        loginResponse.setExpiresIn(jwtUtil.getExpirationTime());
-
-        return ResponseEntity.ok(loginResponse);
+        return ResponseEntity.ok(ApiResponse.success("Login successful", loginResponse));
     }
 }

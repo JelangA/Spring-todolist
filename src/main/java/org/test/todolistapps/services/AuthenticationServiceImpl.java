@@ -6,9 +6,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.test.todolistapps.dto.LoginRequest;
+import org.test.todolistapps.dto.LoginResponse;
 import org.test.todolistapps.dto.RegisterRequest;
 import org.test.todolistapps.entities.User;
 import org.test.todolistapps.repository.UserRepository;
+import org.test.todolistapps.utils.JwtUtil;
 
 @Slf4j
 @Service
@@ -19,14 +21,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
+    private final JwtUtil jwtUtil;
+
     public AuthenticationServiceImpl(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            JwtUtil jwtUtil
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -40,7 +46,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public User authenticate(LoginRequest input) {
+    public LoginResponse authenticate(LoginRequest input) {
         log.info(
                 "Authenticating user {} with password {}",
                 input.getUsername(),
@@ -58,7 +64,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 input.getUsername()
         );
 
-        return userRepository.findByUsername(input.getUsername())
+        User user = userRepository.findByUsername(input.getUsername())
                 .orElseThrow();
+
+        String jwtToken = jwtUtil.generateToken(user.getUsername());
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setToken(jwtToken);
+        loginResponse.setExpiresIn(jwtUtil.getExpirationTime());
+
+        return loginResponse;
     }
 }

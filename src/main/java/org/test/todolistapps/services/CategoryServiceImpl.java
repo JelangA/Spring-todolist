@@ -1,12 +1,12 @@
 package org.test.todolistapps.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import org.test.todolistapps.dto.CategoryRequest;
 import org.test.todolistapps.dto.CategoryResponse;
 import org.test.todolistapps.dto.TaskResponse;
-import org.test.todolistapps.dto.TaskResponseGetCategory;
 import org.test.todolistapps.entities.Category;
 import org.test.todolistapps.entities.Task;
 import org.test.todolistapps.repository.CategoryRepository;
@@ -15,6 +15,7 @@ import org.test.todolistapps.repository.TaskRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
@@ -53,34 +54,25 @@ public class CategoryServiceImpl implements CategoryService {
                 .description(category.getDescription())
                 .tasks(taskResponses)
                 .build();
-
-//        List<Task> tasks = taskRepository.findByCategoryId(id);
-//
-//        TaskResponse taskresponse = objectMapper.convertValue(tasks, TaskResponse.class);
-//
-//        for (Task task : tasks){
-//            TaskResponse taskResponse = mapTaskToTaskResponse(task);
-//        }
-//
-//        return CategoryResponse.builder()
-//                .id(category.getId())
-//                .name(category.getName())
-//                .description(category.getDescription())
-//                .tasks(taskresponse)
-//                .build();
     }
 
     @Override
-    public Category createCategory(Category category) {
+    public Category createCategory(CategoryRequest request) {
+        log.info("Creating category: {}", request.getName());
+        Category category = Category.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .build();
         return categoryRepository.save(category);
     }
 
     @Override
-    public Category updateCategory(Long id, Category category) {
+    public Category updateCategory(Long id, CategoryRequest request) {
+        log.info("Updating category with id: {}", id);
         Category existingCategory = categoryRepository.findById(id).orElse(null);
         if (existingCategory != null) {
-            existingCategory.setName(category.getName());
-            existingCategory.setDescription(category.getDescription());
+            existingCategory.setName(request.getName());
+            existingCategory.setDescription(request.getDescription());
             return categoryRepository.save(existingCategory);
         }
         return null;
